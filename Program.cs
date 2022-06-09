@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
-using System.Speech.Synthesis;
+
 
 namespace MemoryGameCheater
 {
@@ -12,10 +12,6 @@ namespace MemoryGameCheater
         {
             //initialize list to hold pattern
             var patternList = new List<string>();
-
-            //initialize speech synthesis
-            SpeechSynthesizer patternPlayback = new SpeechSynthesizer();
-            patternPlayback.Volume = 25;
 
             Console.WriteLine("Press arrow keys");
 
@@ -27,43 +23,21 @@ namespace MemoryGameCheater
 
             var assignment = new Dictionary<Combination, Action>
             {
-                {upArrowAssign, UpArrowInput},
-                {leftArrowAssign, LeftArrowInput},
-                {rightArrowAssign, RightArrowInput},
-                {playbackAssign, PatternPlayback}
-
+                {upArrowAssign, () => patternList.Add("Up")},
+                {leftArrowAssign, () => patternList.Add("Left")},
+                {rightArrowAssign, () => patternList.Add("Right")},
+                {playbackAssign, () =>
+                {
+                    Playback.PatternPlayback(patternList);
+                    patternList.Clear();
+                }}
             };
 
             Hook.GlobalEvents().OnCombination(assignment);
 
             Application.Run(new ApplicationContext());
 
-
-            //actions for each hotkey
-              void UpArrowInput()
-            {
-                patternList.Add("Up");
-            }
-              void LeftArrowInput()
-            {
-                patternList.Add("Left");
-            }
-              void RightArrowInput()
-            {
-                patternList.Add("Right");
-            }
-
-              //Pattern playback + delete previous pattern when complete
-              void PatternPlayback()
-              {
-                  foreach (var direction in patternList)
-                  {
-                      Console.WriteLine(direction);
-                      patternPlayback.Speak(direction);
-                  }
-
-                  patternList.Clear();
-              }
+            
         }
     }
 }
